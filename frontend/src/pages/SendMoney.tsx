@@ -10,7 +10,7 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react'
-import { createTransaction } from '../services/api'
+import { createTransaction, api } from '../services/api'
 import './SendMoney.css'
 
 const privacyLevels = [
@@ -59,10 +59,16 @@ export default function SendMoney() {
     setError('')
 
     try {
-      // In a real app, we'd look up receiver_id by email
-      // For now, using a placeholder
+      // Look up receiver_id by email
+      const lookupResponse = await api.get('/users/lookup_by_email/', {
+        params: { email: formData.receiver_email }
+      })
+      
+      const receiver_id = lookupResponse.data.id
+      
+      // Now create the transaction with the correct receiver_id
       await createTransaction({
-        receiver_id: 1, // This should be looked up from email
+        receiver_id: receiver_id,
         amount: formData.amount,
         privacy_level: formData.privacy_level as any,
         description: formData.description,
@@ -73,7 +79,8 @@ export default function SendMoney() {
       setSuccess(true)
       setTimeout(() => navigate('/dashboard'), 2000)
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Transaction failed')
+      const errorMsg = err.response?.data?.error || 'Transaction failed'
+      setError(errorMsg)
       setLoading(false)
     }
   }

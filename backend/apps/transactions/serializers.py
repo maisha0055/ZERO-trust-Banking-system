@@ -153,14 +153,28 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
                     'error': 'ECC key not available for high privacy encryption'
                 })
         
-        # Create transaction
+        # Generate transaction hash for chain integrity
+        import hashlib
+        from datetime import datetime
+        tx_data = f"{sender.id}_{receiver.id}_{amount}_{datetime.now().isoformat()}"
+        tx_hash = hashlib.sha256(tx_data.encode()).hexdigest()
+        
+        # Get previous transaction hash
+        last_tx = Transaction.objects.filter(receiver=receiver).order_by('-created_at').first()
+        previous_hash = last_tx.transaction_hash if last_tx else None
+        
+        # Create transaction with proper status and type
         transaction = Transaction.objects.create(
             sender=sender,
             receiver=receiver,
             amount=amount,
             privacy_level=privacy_level,
             encrypted_payload=encrypted_payload,
-            hmac_signature='pending'  # Will be updated after creation
+            transaction_type=Transaction.TYPE_TRANSFER,
+            status=Transaction.STATUS_COMPLETED,  # Mark as completed immediately
+            hmac_signature='pending',  # Will be updated after creation
+            transaction_hash=tx_hash,
+            previous_hash=previous_hash
         )
         
         # Generate HMAC signature

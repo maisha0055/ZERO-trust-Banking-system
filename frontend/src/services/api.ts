@@ -106,6 +106,8 @@ export interface Post {
   author_email: string
   title: string
   content: string
+  title_encrypted?: string
+  content_encrypted?: string
   is_author: boolean
   created_at: string
   updated_at: string
