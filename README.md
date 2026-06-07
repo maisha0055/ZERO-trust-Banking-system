@@ -2,7 +2,7 @@
 
 A comprehensive, secure banking platform built with zero-trust principles, featuring advanced cryptography, role-based access control, and tamper-proof transaction integrity.
 
-## 📋 Table of Contents
+## 📋 Table of Contents 
 
 - [Overview](#overview)
 - [Features](#features)
